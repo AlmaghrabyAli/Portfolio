@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://almaghrabyali.github.io/sitemap.xml
+Sitemap: https://almaghraby-ali.vercel.app/sitemap.xml
