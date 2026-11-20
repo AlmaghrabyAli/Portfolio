@@ -1,7 +1,30 @@
+# ─── Editor & OS ───────────────────────────────────────────────
 .vscode/
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# ─── Dependencies ───────────────────────────────────────────────
 node_modules/
+
+# ─── Environment & Secrets ──────────────────────────────────────
 .env
+.env.local
+.env.*.local
+
+# ─── Deployment ─────────────────────────────────────────────────
 .vercel/
+
+# ─── Logs & Debug ───────────────────────────────────────────────
 *.log
+npm-debug.log*
+
+# ─── Temporary / One-off Scripts ────────────────────────────────
+fix_domain.js
+*.temp.js
+*.temp.py
+
+# ─── Build Output ───────────────────────────────────────────────
+dist/
+build/
+out/
