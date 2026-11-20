@@ -25,6 +25,10 @@
     /* Hero & Brand Accents */
     --hero-name-color: #111827;
     --net-color: #512BD4;
+
+    /* Form Feedback Colors */
+    --danger-color: #dc2626;
+    --success-color: #16a34a;
 }
 
 [data-theme="dark"] {
@@ -48,6 +52,10 @@
     /* Hero & Brand Accents */
     --hero-name-color: #ffffff;
     --net-color: #9B7BFF;
+
+    /* Form Feedback Colors */
+    --danger-color: #f87171;
+    --success-color: #4ade80;
 }
 
 /* Reset & Base */
@@ -1460,6 +1468,68 @@ textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     background: rgba(255, 255, 255, 0.1);
+}
+
+/* Accessibility Utility */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Honeypot Anti-Spam */
+.honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Form Validation & Status */
+.field-error {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--danger-color);
+    margin-top: 0.35rem;
+}
+
+input.is-invalid,
+textarea.is-invalid {
+    border-color: var(--danger-color);
+}
+
+input.is-invalid:focus,
+textarea.is-invalid:focus {
+    border-color: var(--danger-color);
+}
+
+.form-status {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-align: start;
+}
+
+.form-status.is-success {
+    color: var(--success-color);
+}
+
+.form-status.is-error {
+    color: var(--danger-color);
+}
+
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* Footer */

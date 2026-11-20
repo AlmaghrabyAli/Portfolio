@@ -61,7 +61,20 @@ document.addEventListener('DOMContentLoaded', () => {
             svc4Title: "Website Redesign",
             svc4Desc: "Cleaner structure, better design, and improved performance.",
             svc5Title: "Portfolio & Landing Pages",
-            svc5Desc: "Professional pages that turn visitors into conversations."
+            svc5Desc: "Professional pages that turn visitors into conversations.",
+            formNameLabel: "Name",
+            formEmailLabel: "Email",
+            formMessageLabel: "Message",
+            formNamePh: "Your Name",
+            formEmailPh: "Your Email",
+            formMessagePh: "Your Message",
+            formSending: "Sending...",
+            formSuccess: "Thanks! Your message was sent. I'll get back to you soon.",
+            formError: "Couldn't send your message. Try again or email me directly.",
+            formErrName: "Enter your name.",
+            formErrEmail: "Enter a valid email address.",
+            formErrMsgMin: "Your message should be at least 10 characters.",
+            formErrMsgMax: "Your message is too long (1000 characters max)."
         },
         ar: {
             home: "الرئيسية",
@@ -120,7 +133,20 @@ document.addEventListener('DOMContentLoaded', () => {
             svc4Title: "إعادة تصميم المواقع",
             svc4Desc: "هيكلة أنظف وتصميم أفضل وأداء محسّن.",
             svc5Title: "صفحات شخصية وصفحات هبوط",
-            svc5Desc: "صفحات احترافية تحوّل الزوار إلى تواصل حقيقي."
+            svc5Desc: "صفحات احترافية تحوّل الزوار إلى تواصل حقيقي.",
+            formNameLabel: "الاسم",
+            formEmailLabel: "البريد الإلكتروني",
+            formMessageLabel: "الرسالة",
+            formNamePh: "اسمك",
+            formEmailPh: "بريدك الإلكتروني",
+            formMessagePh: "رسالتك",
+            formSending: "جارٍ الإرسال...",
+            formSuccess: "شكرًا لك! تم إرسال رسالتك وسأرد عليك قريبًا.",
+            formError: "تعذّر إرسال رسالتك. حاول مرة أخرى أو راسلني مباشرة عبر البريد.",
+            formErrName: "أدخل اسمك.",
+            formErrEmail: "أدخل بريدًا إلكترونيًا صحيحًا.",
+            formErrMsgMin: "يجب ألا تقل رسالتك عن 10 أحرف.",
+            formErrMsgMax: "رسالتك طويلة جدًا (الحد الأقصى 1000 حرف)."
         }
     };
 
@@ -152,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
             '#services': t.services,
             '#contact': t.contact
         };
-        document.querySelectorAll('.nav-list .nav-link').forEach(link => {
+        document.querySelectorAll('.nav-list .nav-link, .mobile-menu .mobile-link').forEach(link => {
             const label = navLabels[link.getAttribute('href')];
             if (label) link.innerText = label;
         });
@@ -194,6 +220,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('[data-i18n]').forEach(el => {
             if (t && t[el.dataset.i18n] !== undefined) {
                 el.textContent = t[el.dataset.i18n];
+            }
+        });
+
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            if (t && t[el.dataset.i18nPlaceholder] !== undefined) {
+                el.placeholder = t[el.dataset.i18nPlaceholder];
             }
         });
     }
@@ -299,32 +331,160 @@ document.addEventListener('DOMContentLoaded', () => {
     const animatedElements = document.querySelectorAll('.fade-in-up, .fade-in-left, .fade-in-right');
     animatedElements.forEach(el => observer.observe(el));
 
-    // --- Form Handling (Mock) ---
-    const contactForm = document.querySelector('.contact-form');
+    // --- Contact Form Handling (Web3Forms) ---
+    const contactForm = document.getElementById('contact-form') || document.querySelector('.contact-form');
     if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
+        const nameField = contactForm.querySelector('#cf-name');
+        const emailField = contactForm.querySelector('#cf-email');
+        const msgField = contactForm.querySelector('#cf-message');
+        const formStatus = document.getElementById('form-status') || contactForm.querySelector('.form-status');
+        const submitBtn = contactForm.querySelector('button[type="submit"]');
+
+        const nameError = document.getElementById('cf-name-error');
+        const emailError = document.getElementById('cf-email-error');
+        const msgError = document.getElementById('cf-message-error');
+
+        // Helper to clear error on a single field
+        const clearFieldError = (field, errorEl) => {
+            if (field) {
+                field.classList.remove('is-invalid');
+                field.removeAttribute('aria-invalid');
+            }
+            if (errorEl) {
+                errorEl.textContent = '';
+            }
+        };
+
+        // Clear error as soon as user edits that field
+        if (nameField) nameField.addEventListener('input', () => clearFieldError(nameField, nameError));
+        if (emailField) emailField.addEventListener('input', () => clearFieldError(emailField, emailError));
+        if (msgField) msgField.addEventListener('input', () => clearFieldError(msgField, msgError));
+
+        contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = contactForm.querySelector('button');
-            const originalText = btn.innerText;
 
-            btn.innerText = 'Sending...'; // This should ideally be translated too
-            btn.disabled = true;
+            // Clear previous errors and status
+            clearFieldError(nameField, nameError);
+            clearFieldError(emailField, emailError);
+            clearFieldError(msgField, msgError);
+            if (formStatus) {
+                formStatus.textContent = '';
+                formStatus.className = 'form-status';
+            }
 
-            setTimeout(() => {
-                btn.innerText = 'Message Sent!'; // And this
-                btn.style.backgroundColor = 'var(--accent-color)';
+            const currentLang = localStorage.getItem('lang') || 'en';
+            const t = translations[currentLang] || translations.en;
+
+            // Honeypot check
+            const botcheck = contactForm.querySelector('input[name="botcheck"]');
+            if (botcheck && botcheck.checked) {
+                if (formStatus) {
+                    formStatus.className = 'form-status is-success';
+                    formStatus.textContent = t.formSuccess;
+                }
                 contactForm.reset();
+                return;
+            }
 
-                setTimeout(() => {
-                    // btn.innerText = originalText; Using translated text would be better
-                    // To keep it simple, we revert to current lang translation
-                    const current = localStorage.getItem('lang') || 'en';
-                    btn.innerText = translations[current].sendMessage;
+            // Client-side validation
+            let hasError = false;
+            let firstInvalid = null;
 
-                    btn.disabled = false;
-                    btn.style.backgroundColor = '';
-                }, 3000);
-            }, 1000);
+            // Name validation
+            const nameVal = nameField ? nameField.value.trim() : '';
+            if (nameVal.length < 2) {
+                hasError = true;
+                if (nameField) {
+                    nameField.classList.add('is-invalid');
+                    nameField.setAttribute('aria-invalid', 'true');
+                    if (!firstInvalid) firstInvalid = nameField;
+                }
+                if (nameError) nameError.textContent = t.formErrName;
+            }
+
+            // Email validation
+            const emailVal = emailField ? emailField.value.trim() : '';
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailVal)) {
+                hasError = true;
+                if (emailField) {
+                    emailField.classList.add('is-invalid');
+                    emailField.setAttribute('aria-invalid', 'true');
+                    if (!firstInvalid) firstInvalid = emailField;
+                }
+                if (emailError) emailError.textContent = t.formErrEmail;
+            }
+
+            // Message validation
+            const msgVal = msgField ? msgField.value.trim() : '';
+            if (msgVal.length < 10) {
+                hasError = true;
+                if (msgField) {
+                    msgField.classList.add('is-invalid');
+                    msgField.setAttribute('aria-invalid', 'true');
+                    if (!firstInvalid) firstInvalid = msgField;
+                }
+                if (msgError) msgError.textContent = t.formErrMsgMin;
+            } else if (msgVal.length > 1000) {
+                hasError = true;
+                if (msgField) {
+                    msgField.classList.add('is-invalid');
+                    msgField.setAttribute('aria-invalid', 'true');
+                    if (!firstInvalid) firstInvalid = msgField;
+                }
+                if (msgError) msgError.textContent = t.formErrMsgMax;
+            }
+
+            if (hasError) {
+                if (firstInvalid) firstInvalid.focus();
+                return;
+            }
+
+            // Form is valid - submit via fetch
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = t.formSending;
+            }
+
+            try {
+                const formData = new FormData(contactForm);
+                const payload = Object.fromEntries(formData.entries());
+
+                const response = await fetch('https://api.web3forms.com/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    if (formStatus) {
+                        formStatus.className = 'form-status is-success';
+                        formStatus.textContent = t.formSuccess;
+                    }
+                    contactForm.reset();
+                } else {
+                    if (formStatus) {
+                        formStatus.className = 'form-status is-error';
+                        formStatus.textContent = t.formError;
+                    }
+                }
+            } catch (err) {
+                if (formStatus) {
+                    formStatus.className = 'form-status is-error';
+                    formStatus.textContent = t.formError;
+                }
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    const activeLang = localStorage.getItem('lang') || 'en';
+                    submitBtn.textContent = (translations[activeLang] || translations.en).sendMessage;
+                }
+            }
         });
     }
 
@@ -417,6 +577,30 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.project-card .project-img').forEach(function(img) {
         img.addEventListener('error', function () {
             this.closest('.project-card').classList.add('img-error');
+        });
+    });
+
+    // --- Gmail Compose Floating Popup ---
+    document.querySelectorAll('.gmail-popup-link').forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const width = 680;
+            const height = 650;
+            const left = Math.max(0, Math.round((window.screen.width - width) / 2));
+            const top = Math.max(0, Math.round((window.screen.height - height) / 2));
+            const url = 'https://mail.google.com/mail/?view=cm&fs=1&to=almaghrapyali6@gmail.com';
+
+            const popup = window.open(
+                url,
+                '_blank',
+                `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes,noopener=yes`
+            );
+
+            if (popup) {
+                try {
+                    popup.opener = null;
+                } catch (_) {}
+            }
         });
     });
 
